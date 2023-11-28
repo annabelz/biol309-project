@@ -1,4 +1,4 @@
-let inButton, outButton, clearButton;
+let inButton, outButton, clearButton, simButton;
 let nextInPosition, nextOutPosition;
 let allIns, allOuts;
 
@@ -19,15 +19,17 @@ function setup() {
   clearButton = createButton("Clear")
   clearButton.position(800, 300);
 
+  simButton = createButton("Simulate")
+  simButton.position(800, 400);
+
   nextInPosition = [100, 100];
   nextOutPosition = [600, 100];
 
-  // create new input/output neurons when respective buttons are pressed
+  // attach functions to each button
   inButton.mousePressed(newInput);
   outButton.mousePressed(newOutput);
-
-  // clear button function
   clearButton.mousePressed(clearCanvas);
+  simButton.mousePressed(simulate);
 
   allIns = [];
   allOuts = [];
@@ -57,16 +59,31 @@ function newInput() {
     submit.remove();
     input.remove();
     newNode.display();
+    nextInPosition[1] += 100;
   }
-  
-  nextInPosition[1] += 100;
-
 }
 
-
 function newOutput() {
-  allOuts.push(new OutputNode(nextOutPosition));
-  nextOutPosition[1] += 100;
+
+  let input, submit;
+
+  // collect weight info
+  input = createInput();
+  input.position(nextOutPosition[0] + 10, nextOutPosition[1] - 35);
+
+  submit = createButton('Enter threshold');
+  submit.position(input.x + input.width, input.y);
+  submit.mousePressed(setThreshold);
+
+  function setThreshold() {
+    let newNode = new OutputNode(nextOutPosition, float(input.value()));
+    allOuts.push(newNode);
+
+    submit.remove();
+    input.remove();
+    newNode.display();
+    nextOutPosition[1] += 100;
+  }
 }
 
 // TODO: make the clear erase text
@@ -74,6 +91,13 @@ function clearCanvas() {
   background(220);
   nextInPosition = [100, 100];
   nextOutPosition = [600, 100];
+  allIns = [];
+  allOuts = [];
+}
+
+function simulate() {
+  console.log(allIns);
+  console.log(allOuts);
 }
 
 class InputNode {
@@ -86,7 +110,20 @@ class InputNode {
 
   display() {
     circle(this.x, this.y, this.diameter);
-    text('weight: ' + this.weight, this.x - 40, this.y - 50);
-    console.log(this.weight);
+    text('weight: ' + this.weight, this.x - 40, this.y - 10);
+  }
+}
+
+class OutputNode {
+  constructor(position, threshold) {
+    this.x = position[0];
+    this.y = position[1];
+    this.diameter = 100;
+    this.threshold = threshold;
+  }
+
+  display() {
+    circle(this.x, this.y, this.diameter);
+    text('threshold: ' + this.threshold, this.x - 40, this.y - 10);
   }
 }
